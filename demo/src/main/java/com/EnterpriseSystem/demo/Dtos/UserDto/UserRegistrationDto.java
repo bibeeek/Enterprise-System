@@ -1,4 +1,4 @@
-package com.EnterpriseSystem.demo.Dtos;
+package com.EnterpriseSystem.demo.Dtos.UserDto;
 
 
 import jakarta.validation.constraints.Email;

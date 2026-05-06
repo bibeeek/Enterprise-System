@@ -1,7 +1,6 @@
-package com.EnterpriseSystem.demo.Dtos;
+package com.EnterpriseSystem.demo.Dtos.UserDto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
@@ -14,6 +13,9 @@ public class UserResponseDto {
     private String email;
     private String role;
     private Boolean isActive;
+    private String lastLogin;
+    private String DepartmentName;
+
 
 
 

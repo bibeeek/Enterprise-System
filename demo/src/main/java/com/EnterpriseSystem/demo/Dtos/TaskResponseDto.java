@@ -16,7 +16,7 @@ public class TaskResponseDto {
     private String taskPriority;
     private String taskCategory;
     private String deadline;
-    private String estimatedTime;
+    private Integer estimatedTimeInHrs;
     private String createdAt;
     private String updatedAt;
     private String createdBy;

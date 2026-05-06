@@ -49,7 +49,7 @@ public class Tasks {
     private TaskCategory taskCategory;
 
     @Column(nullable = false)
-    private Integer estimatedTime;
+    private Integer estimatedTimeInHrs;
 
     @Column(nullable = false)
     private LocalDateTime deadline;

@@ -49,11 +49,17 @@ public class Users {
     private String address;
 
     @Column(length = 10,nullable = false)
-    private Long phoneNumber;
+    private String phoneNumber;
 
     private LocalDateTime lastLogin;
 
     private Boolean isActive;
+
+    private Boolean accountNonLocked;
+
+    private Integer failedLoginAttempts;
+
+    private LocalDateTime lockTime;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
