@@ -2,7 +2,9 @@ package com.EnterpriseSystem.demo.Exceptions;
 
 
 import com.EnterpriseSystem.demo.Exceptions.CustomExceptions.*;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -77,7 +79,16 @@ public class GlobalExceptionHandler{
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
 
     }
-
+    @ExceptionHandler(MalformedJwtException.class)
+    public ResponseEntity<ApiResponse<?>> handleMalformedJwtException(MalformedJwtException ex){
+        ApiResponse<?> response= new ApiResponse<>(ex.getMessage(),401, LocalDateTime.now(),null);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ApiResponse<?>> handleExpiredJwtException(ExpiredJwtException ex){
+        ApiResponse<?> response= new ApiResponse<>(ex.getMessage(),401, LocalDateTime.now(),null);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
     //this is for validation exceptions in controller
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<?>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex){

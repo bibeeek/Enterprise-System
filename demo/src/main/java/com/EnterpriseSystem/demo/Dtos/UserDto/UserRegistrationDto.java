@@ -30,8 +30,6 @@ public class UserRegistrationDto {
     @NotBlank(message = "Full Name is required")
     private String fullName;
 
-    private LocalDateTime createdAt;
-
     @NotBlank(message = "Address is required")
     private String address;
 
