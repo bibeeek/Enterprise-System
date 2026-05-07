@@ -20,6 +20,8 @@ You can test and explore the deployed APIs using Swagger UI:
 - Local Swagger URL:  
   http://localhost:8080/swagger-ui/index.html
 
+Admin Email:admin@enterprise.com
+pass:admin1234
 ---
 
 ## Tech Stack
