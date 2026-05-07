@@ -56,7 +56,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
 
         http.csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.disable())
+                .cors(Customizer.withDefaults())
                 .sessionManagement((sessionConfig->sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS)))
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(req-> req.
