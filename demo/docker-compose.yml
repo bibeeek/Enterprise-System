@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: enterprise-db
+    environment:
+      POSTGRES_DB: EnterpriseSystem
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: bibek
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d EnterpriseSystem"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: enterprise-app
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/EnterpriseSystem
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: bibek
+      JWT_SECRET: absjhvbfjh345jhvejshfv89237y4hsgvdfhcsj2893y4rshgdvch32847yrshv
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: enterprise-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+volumes:
+  postgres_data:

@@ -16,7 +16,7 @@ public class DemoApplication {
 		SpringApplication.run(DemoApplication.class, args);
 
 
-		System.out.println(LocalDateTime.now());
+		System.out.println(System.getenv("DATABASE_URL"));
 
 
 	}
