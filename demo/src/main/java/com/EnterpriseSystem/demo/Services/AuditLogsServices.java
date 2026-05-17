@@ -4,6 +4,7 @@ import com.EnterpriseSystem.demo.Entity.AuditLogs;
 import com.EnterpriseSystem.demo.Repository.AuditLogsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -19,53 +20,76 @@ public class AuditLogsServices {
     private final AuditLogsRepository auditLogsRepository;
 
 
-    public List<AuditLogs> viewAuditLogs(int page, int size, LocalDate startDate, LocalDate endDate,String order,String sortBy){
+    public List<AuditLogs> viewAuditLogs(int page,
+                                         int size,
+                                         LocalDate startDate,
+                                         LocalDate endDate,
+                                         String order,
+                                         String sortBy) {
 
+        if (startDate != null &&
+                endDate != null &&
+                startDate.isAfter(endDate)) {
 
-        Sort sort= Sort.unsorted();
-        if (sortBy!=null && !sortBy.isEmpty()){
-
-            sort=Sort.by(sortBy);
-            if ("asc".equalsIgnoreCase(order)){
-                sort=sort.ascending();
-            }
-            else{
-                sort=sort.descending();
-            }
-        }
-        else {
-            sort=Sort.by(Sort.Direction.DESC,"timestamp");
+            throw new RuntimeException(
+                    "Start date cannot be after end date"
+            );
         }
 
+        Sort sort;
 
-        if (startDate != null && endDate != null){
+        if (sortBy != null && !sortBy.isBlank()) {
 
-            LocalDateTime startDateTime=startDate.atStartOfDay();
-            LocalDateTime endDateTime=endDate.atTime(23,59,59);
+            sort = "asc".equalsIgnoreCase(order)
+                    ? Sort.by(sortBy).ascending()
+                    : Sort.by(sortBy).descending();
 
-            return auditLogsRepository.findAllByTimestampBetween(startDateTime, endDateTime, sort);
+        } else {
 
-        }
-        if (endDate != null){
-
-            LocalDateTime endDateTime=endDate.atTime(23,59,59);
-            return auditLogsRepository.findAllByTimestampBefore(endDateTime,sort);
-
-        }
-        if(startDate!=null){
-
-            LocalDateTime startDateTime= startDate.atStartOfDay();
-
-            return auditLogsRepository.findAllByTimestampAfter(startDateTime,sort);
-
+            sort = Sort.by("timestamp").ascending();
         }
 
-        Page<AuditLogs> paginatedLogs = auditLogsRepository.findAll(Pageable.ofSize(size).withPage(page));
-        return paginatedLogs.toList();
+        Pageable pageable = PageRequest.of(page, size, sort);
 
+        // BETWEEN DATES
+
+        if (startDate != null && endDate != null) {
+
+            return auditLogsRepository
+                    .findAllByTimestampBetween(
+                            startDate.atStartOfDay(),
+                            endDate.atTime(23, 59, 59),
+                            pageable
+                    );
+
+        }
+
+        // ONLY END DATE
+
+        if (endDate != null) {
+
+            return auditLogsRepository
+                    .findAllByTimestampBefore(
+                            endDate.atTime(23, 59, 59),
+                            pageable
+                    );
+        }
+
+        // ONLY START DATE
+
+        if (startDate != null) {
+
+            return auditLogsRepository
+                    .findAllByTimestampAfter(
+                            startDate.atStartOfDay(),
+                            pageable
+                    );
+        }
+
+        // NORMAL PAGINATION
+
+        return auditLogsRepository.findAll(pageable).toList();
     }
-
-
 
 
 }

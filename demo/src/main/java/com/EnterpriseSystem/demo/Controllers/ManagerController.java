@@ -1,6 +1,7 @@
 package com.EnterpriseSystem.demo.Controllers;
 
 import com.EnterpriseSystem.demo.Dtos.DepartmentRequestDto;
+import com.EnterpriseSystem.demo.Dtos.DepartmentResponseDto;
 import com.EnterpriseSystem.demo.Dtos.TaskRequestDto;
 import com.EnterpriseSystem.demo.Dtos.TaskResponseDto;
 import com.EnterpriseSystem.demo.Dtos.UserDto.UserResponseDto;
@@ -35,21 +36,7 @@ public class ManagerController{
 
     }
 
-    @PutMapping("/disableDepartment/{departmentName}")
-    public ResponseEntity<ApiResponse<?>> disableDepartment(@PathVariable String departmentName){
 
-        managerServices.disableDepartment(departmentName);
-        ApiResponse<?> response=new ApiResponse<>("Department Disabled Successfully",200, LocalDateTime.now(),null);
-        return ResponseEntity.ok(response);
-     }
-
-    @PutMapping("/enableDepartment/{departmentName}")
-    public ResponseEntity<ApiResponse<?>> enableDepartment(@PathVariable String departmentName){
-
-        managerServices.enableDepartment(departmentName);
-        ApiResponse<?> response=new ApiResponse<>("Department Enabled Successfully",200, LocalDateTime.now(),null);
-        return ResponseEntity.ok(response);
-    }
 
     @GetMapping("/getAllUsersAssignedToDeparment/{departmentName}")
     public ResponseEntity<ApiResponse<List<UserResponseDto>>> getAllUsersAssignedToDepartment(@PathVariable String departmentName){
@@ -130,6 +117,47 @@ public class ManagerController{
         ApiResponse<?> response=new ApiResponse<>("Task Enabled Successfully",200, LocalDateTime.now(),null);
         return ResponseEntity.ok(response);
     }
+
+    //newly added methods
+    @GetMapping("/getMyDepartment")
+    public ResponseEntity<ApiResponse<DepartmentResponseDto>> getMyDepartment() {
+        DepartmentResponseDto dept = managerServices.getManagerDepartment();
+        ApiResponse<DepartmentResponseDto> response = new ApiResponse<>("Manager Department", 200, LocalDateTime.now(), dept);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/getMyDepartmentUsers")
+    public ResponseEntity<ApiResponse<List<UserResponseDto>>> getMyDepartmentUsers() {
+        List<UserResponseDto> users = managerServices.listUsersInManagerDepartment();
+        ApiResponse<List<UserResponseDto>> response = new ApiResponse<>("Department Users", 200, LocalDateTime.now(), users);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/getMyDepartmentManagers")
+    public ResponseEntity<ApiResponse<List<UserResponseDto>>> getMyDepartmentManagers(){
+
+        List<UserResponseDto> users= managerServices.listManagerInDepartment();
+        ApiResponse<List<UserResponseDto>> response=new ApiResponse<>("Department Managers",200, LocalDateTime.now(),users);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/getAllUnassignedUsers")
+    public ResponseEntity<ApiResponse<List<UserResponseDto>>> getAllUnassignedUsers(){
+
+        List<UserResponseDto> unassignedUsers = managerServices.listUnassignedUsers();
+        ApiResponse<List<UserResponseDto>> response=new ApiResponse<>("All Unassigned Users",200, LocalDateTime.now(),unassignedUsers);
+        return ResponseEntity.ok(response);
+
+    }
+    @PutMapping("/unassignUserFromDepartment/{username}")
+    public ResponseEntity<ApiResponse<?>> unassignUserFromDepartment(@PathVariable String username){
+
+        managerServices.unassignUser(username);
+        ApiResponse<?> response=new ApiResponse<>("User Unassigned Successfully",200, LocalDateTime.now(),null);
+        return ResponseEntity.ok(response);
+
+    }
+
 
 
 

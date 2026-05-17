@@ -10,6 +10,8 @@ import com.EnterpriseSystem.demo.Entity.Tasks;
 import com.EnterpriseSystem.demo.Entity.Users;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class Mapper {
 
@@ -93,6 +95,18 @@ public class Mapper {
         departmentResponseDto.setDepartmentName(departments.getDepartmentName());
         departmentResponseDto.setDepartmentDescription(departments.getDepartmentDescription());
         departmentResponseDto.setIsActive(departments.getIsActive());
+        if (departments.getUsers() != null) {
+            List<String> managers = departments.getUsers().stream()
+                    .filter(u -> u.getRole() == Roles.ROLE_MANAGER)
+                    .map(Users::getUserName)
+                    .toList();
+            departmentResponseDto.setManagersUserNames(managers);
+        }
+        if (departments.getUsers() != null) {
+            departments.getUsers().forEach(u ->
+                    System.out.println("User: " + u.getUserName() + " Role: " + u.getRole())
+            );
+        }
         departmentResponseDto.setCreatedAt(departments.getCreatedAt().toString());
         return departmentResponseDto;
 

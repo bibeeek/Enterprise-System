@@ -13,6 +13,7 @@ import com.EnterpriseSystem.demo.Repository.UserRepository;
 import com.EnterpriseSystem.demo.Utils.Mapper;
 import com.EnterpriseSystem.demo.Utils.Roles;
 import com.EnterpriseSystem.demo.Utils.Validations;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -269,7 +270,30 @@ public class AdminServices {
 
         return activeAdminList.stream().map(mapper::adminResponseDto).toList();
     }
+    public List<AdminResponseDto> getAllUsers(int page, int size) {
+        List<Users> allUsers=userRepository.findAllByRole(Roles.ROLE_USER);
+        if (allUsers.isEmpty()) {
+            throw new RuntimeException("No Users Found");
+        }
+        return allUsers.stream().map(mapper::adminResponseDto).toList();
+    }
+    public List<AdminResponseDto> getAllManagers(int page, int size) {
+        List<Users> allManagers=userRepository.findAllByRole(Roles.ROLE_MANAGER);
+        if (allManagers.isEmpty()) {
+            throw new RuntimeException("No Managers Found");
+        }
+        return allManagers.stream().map(mapper::adminResponseDto).toList();
+    }
+    public List<AdminResponseDto> getAllAdmins(int page, int size) {
+        List<Users> allAdmins=userRepository.findAllByRole(Roles.ROLE_ADMIN);
+        if (allAdmins.isEmpty()) {
+            throw new RuntimeException("No Admins Found");
+        }
+        return allAdmins.stream().map(mapper::adminResponseDto).toList();
+    }
 
+
+    @Transactional
     public List<DepartmentResponseDto> viewAllDepartments(){
 
         List<Departments> allDepartments = departmentsRepository.findAll();

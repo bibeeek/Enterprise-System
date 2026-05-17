@@ -1,0 +1,134 @@
+<!-- register.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+
+    <style>
+
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body{
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f4f4f4;
+        }
+
+        .container{
+            width: 400px;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2{
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .input-group{
+            margin-bottom: 15px;
+        }
+
+        .input-group label{
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .input-group input{
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button{
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover{
+            background: #0056b3;
+        }
+
+        .link{
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .link a{
+            text-decoration: none;
+            color: #007bff;
+        }
+
+    </style>
+
+</head>
+<body>
+
+<div class="container">
+
+    <h2>Register</h2>
+
+    <form id="registerForm">
+
+        <div class="input-group">
+            <label>User Name</label>
+            <input type="text" name="userName" id="userName" required>
+        </div>
+
+        <div class="input-group">
+            <label>Full Name</label>
+            <input type="text" name="fullName" id="fullName" required>
+        </div>
+
+        <div class="input-group">
+            <label>Email</label>
+            <input type="email" name="email"  id="email" required>
+        </div>
+
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" name="passWord" id="password" required>
+        </div>
+
+        <div class="input-group">
+            <label>Phone Number</label>
+            <input type="text" name="phoneNumber" id="phoneNumber" required>
+        </div>
+
+        <div class="input-group">
+            <label>Address</label>
+            <input type="text" name="address" id="address" required>
+        </div>
+
+        <button type="submit">Register</button>
+
+    </form>
+
+    <div class="link">
+        Already have an account?
+        <a href="login.html">Login</a>
+    </div>
+
+</div>
+<script src="auth.js"></script>
+</body>
+</html>

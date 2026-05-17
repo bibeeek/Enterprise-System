@@ -81,10 +81,25 @@ public class AdminController {
         return ResponseEntity.ok(response);
 
     }
+    @PutMapping("/disableDepartment/{departmentName}")
+    public ResponseEntity<ApiResponse<?>> disableDepartment(@PathVariable String departmentName){
+
+        managerServices.disableDepartment(departmentName);
+        ApiResponse<?> response=new ApiResponse<>("Department Disabled Successfully",200, LocalDateTime.now(),null);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/enableDepartment/{departmentName}")
+    public ResponseEntity<ApiResponse<?>> enableDepartment(@PathVariable String departmentName){
+
+        managerServices.enableDepartment(departmentName);
+        ApiResponse<?> response=new ApiResponse<>("Department Enabled Successfully",200, LocalDateTime.now(),null);
+        return ResponseEntity.ok(response);
+    }
 
 
-    @GetMapping("/viewAllUsers")
-    public ResponseEntity<ApiResponse<List<AdminResponseDto>>> getAllUsers(@RequestParam(required = false,defaultValue = "0") int page,
+    @GetMapping("/viewAllActiveUsers")
+    public ResponseEntity<ApiResponse<List<AdminResponseDto>>> getAllActiveUsers(@RequestParam(required = false,defaultValue = "0") int page,
                                                                            @RequestParam(required = false,defaultValue = "10") int size
                                                                            ) {
 
@@ -125,6 +140,29 @@ public class AdminController {
         ApiResponse<List<AdminResponseDto>> response = new ApiResponse<>("All Active Admins", 200, LocalDateTime.now(), allActiveAdmins);
         return ResponseEntity.ok(response);
     }
+    @GetMapping("/getAllUsers")
+    public ResponseEntity<ApiResponse<List<AdminResponseDto>>> getAllUsers(@RequestParam(required = false,defaultValue = "0") int page, @RequestParam(required = false,defaultValue = "10") int size){
+
+
+        List<AdminResponseDto> allUsers = adminServices.getAllUsers(page, size);
+        ApiResponse<List<AdminResponseDto>> response = new ApiResponse<>("All Users", 200, LocalDateTime.now(), allUsers);
+        return ResponseEntity.ok(response);
+    }
+    @GetMapping("/getAllManagers")
+    public ResponseEntity<ApiResponse<List<AdminResponseDto>>> getAllManagers(@RequestParam(required = false,defaultValue = "0") int page, @RequestParam(required = false,defaultValue = "10") int size){
+
+
+        List<AdminResponseDto> allManagers = adminServices.getAllManagers(page, size);
+        ApiResponse<List<AdminResponseDto>> response = new ApiResponse<>("All Managers", 200, LocalDateTime.now(), allManagers);
+        return ResponseEntity.ok(response);
+    }
+    @GetMapping("/getAllAdmins")
+    public ResponseEntity<ApiResponse<List<AdminResponseDto>>> getAllAdmins(@RequestParam(required = false,defaultValue = "0") int page, @RequestParam(required = false,defaultValue = "10") int size){
+        List<AdminResponseDto> allAdmins = adminServices.getAllAdmins(page, size);
+        ApiResponse<List<AdminResponseDto>> response = new ApiResponse<>("All Admins", 200, LocalDateTime.now(), allAdmins);
+        return ResponseEntity.ok(response);
+    }
+
 
     @GetMapping("/viewAllDepartments")
     public ResponseEntity<ApiResponse<List<DepartmentResponseDto>>> viewAllDepartments() {
@@ -137,7 +175,7 @@ public class AdminController {
 
     @GetMapping("/viewAllAuditLogs")
     public ResponseEntity<ApiResponse<List<AuditLogs>>> viewAllAuditLogs(@RequestParam(required = false, defaultValue = "0") int page, @RequestParam(required = false, defaultValue = "10") int size,
-                                                                         @RequestParam(required = false, defaultValue = "DESC") String order, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                                                         @RequestParam(required = false, defaultValue = "ASC") String order, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
                                                                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
                                                                          @RequestParam(required = false) String sortBy
     ) {

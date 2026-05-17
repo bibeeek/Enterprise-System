@@ -32,4 +32,14 @@ public interface UserRepository extends JpaRepository<Users,Long> {
     Boolean existsByUserNameAndDepartments(String userName, Departments departments);
 
     List<Users> findAllByIsActiveTrueAndRole(Roles roles, Pageable pageable);
+
+    List<Users> findAllByRole(Roles roles);
+
+    List<Users> findAllByIsActiveTrueAndDepartments(Departments existingDepartment);
+
+   // List<Users> findAllByDepartments(Departments dept);
+
+    List<Users> findAllByDepartmentsAndRole(Departments departments,Roles roles);
+
+    List<Users> findAllByIsActiveTrueAndRoleAndDepartmentsIsNull(Roles roles);
 }

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+
+        body { background: #f4f4f4; min-height: 100vh; }
+
+        /* NAVBAR */
+        .navbar {
+            background: #343a40;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h1 { font-size: 20px; }
+        .navbar button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .navbar button:hover { background: #b02a37; }
+
+        /* TABS */
+        .tabs {
+            background: white;
+            border-bottom: 2px solid #dee2e6;
+            display: flex;
+            padding: 0 30px;
+            overflow-x: auto;
+        }
+        .tab {
+            padding: 14px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            color: #6c757d;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+        }
+        .tab.active { color: #343a40; border-bottom-color: #343a40; }
+        .tab:hover { color: #343a40; }
+
+        /* CONTENT */
+        .content { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* CARD */
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.08);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            color: #333;
+        }
+
+        /* FORM */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .input-group { margin-bottom: 14px; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px; }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 9px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        /* BUTTONS */
+        .btn { padding: 9px 18px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .btn-dark    { background: #343a40; color: white; }
+        .btn-dark:hover { background: #23272b; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #1e7e34; }
+        .btn-danger  { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #b02a37; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        .btn-warning:hover { background: #e0a800; }
+        .btn-sm { padding: 5px 11px; font-size: 12px; }
+
+        /* TABLE */
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { background: #f8f9fa; text-align: left; padding: 10px 12px; color: #555; font-size: 12px; text-transform: uppercase; }
+        td { padding: 11px 12px; border-bottom: 1px solid #f0f0f0; color: #333; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fafafa; }
+
+        /* BADGE */
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        .badge-active   { background: #d4edda; color: #155724; }
+        .badge-inactive { background: #f8d7da; color: #721c24; }
+        .badge-admin    { background: #cce5ff; color: #004085; }
+        .badge-manager  { background: #fff3cd; color: #856404; }
+        .badge-user     { background: #e2e3e5; color: #383d41; }
+
+        /* MSG */
+        .msg { padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 14px; display: none; }
+        .msg.show { display: block; }
+        .msg-success { background: #d4edda; color: #155724; }
+        .msg-error   { background: #f8d7da; color: #721c24; }
+
+        /* LOADING / EMPTY */
+        .loading { text-align: center; color: #888; padding: 30px; }
+        .empty   { text-align: center; color: #aaa; padding: 30px; font-size: 14px; }
+
+        /* AUDIT FILTERS */
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .filter-bar .input-group { margin-bottom: 0; }
+        .filter-bar input, .filter-bar select { padding: 8px; font-size: 13px; }
+
+        /* PAGINATION */
+        .pagination { display: flex; gap: 8px; margin-top: 16px; align-items: center; font-size: 14px; }
+        .pagination button { padding: 6px 14px; border: 1px solid #ccc; background: white; border-radius: 5px; cursor: pointer; }
+        .pagination button:hover { background: #f0f0f0; }
+        .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+        .pagination span { color: #666; }
+
+        /* STATS ROW */
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 25px; }
+        .stat-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.08); text-align: center; }
+        .stat-card .val { font-size: 28px; font-weight: bold; color: #343a40; }
+        .stat-card .lbl { font-size: 13px; color: #888; margin-top: 4px; }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+    <h1>⚙ Admin Panel</h1>
+    <button onclick="logout()">Logout</button>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+    <div class="tab active" onclick="switchTab('users')">Users</div>
+    <div class="tab" onclick="switchTab('managers')">Managers</div>
+    <div class="tab" onclick="switchTab('admins')">Admins</div>
+    <div class="tab" onclick="switchTab('departments')">Departments</div>
+    <div class="tab" onclick="switchTab('addAdmin')">Add Admin</div>
+    <div class="tab" onclick="switchTab('addManager')">Add Manager</div>
+    <div class="tab" onclick="switchTab('audit')">Audit Logs</div>
+</div>
+
+<div class="content">
+
+    <!-- ── USERS TAB ── -->
+    <div class="tab-content active" id="tab-users">
+        <div class="card">
+            <h2>All Active Users</h2>
+            <div id="usersMsg" class="msg"></div>
+            <div id="usersLoading" class="loading">Loading users...</div>
+            <div id="usersContainer" style="display:none;">
+                <table>
+                    <thead><tr>
+                        <th>Username</th><th>Full Name</th><th>Email</th>
+                        <th>Phone</th><th>Address</th><th>Department</th>
+                        <th>Role</th><th>Status</th><th>Last Login</th>
+                        <th>Created At</th><th>Actions</th>
+                    </tr></thead>
+                    <tbody id="usersBody"></tbody>
+                </table>
+                <div class="pagination">
+                    <button onclick="changePage('users', -1)">← Prev</button>
+                    <span id="usersPage">Page 1</span>
+                    <button onclick="changePage('users', 1)">Next →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── MANAGERS TAB ── -->
+    <div class="tab-content" id="tab-managers">
+        <div class="card">
+            <h2>All Active Managers</h2>
+            <div id="managersMsg" class="msg"></div>
+            <div id="managersLoading" class="loading">Loading managers...</div>
+            <div id="managersContainer" style="display:none;">
+                <table>
+                    <thead><tr>
+                        <th>Username</th><th>Full Name</th><th>Email</th>
+                        <th>Phone</th><th>Address</th><th>Department</th>
+                        <th>Role</th><th>Status</th><th>Last Login</th>
+                        <th>Created At</th><th>Actions</th>
+                    </tr></thead>
+                    <tbody id="managersBody"></tbody>
+                </table>
+                <div class="pagination">
+                    <button onclick="changePage('managers', -1)">← Prev</button>
+                    <span id="managersPage">Page 1</span>
+                    <button onclick="changePage('managers', 1)">Next →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── ADMINS TAB ── -->
+    <div class="tab-content" id="tab-admins">
+        <div class="card">
+            <h2>All Active Admins</h2>
+            <div id="adminsMsg" class="msg"></div>
+            <div id="adminsLoading" class="loading">Loading admins...</div>
+            <div id="adminsContainer" style="display:none;">
+                <table>
+                    <thead><tr>
+                        <th>Username</th><th>Full Name</th><th>Email</th>
+                        <th>Phone</th><th>Address</th><th>Department</th>
+                        <th>Role</th><th>Last Login</th>
+                        <th>Created At</th>
+                    </tr></thead>
+                    <tbody id="adminsBody"></tbody>
+                </table>
+                <div class="pagination">
+                    <button onclick="changePage('admins', -1)">← Prev</button>
+                    <span id="adminPage">Page 1</span>
+                    <button onclick="changePage('admins', 1)">Next →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── DEPARTMENTS TAB ── -->
+    <div class="tab-content" id="tab-departments">
+        <div class="card">
+            <h2>All Departments</h2>
+            <div id="deptsMsg" class="msg"></div>
+            <div id="deptsLoading" class="loading">Loading departments...</div>
+            <div id="deptsContainer" style="display:none;">
+                <table>
+                    <thead><tr>
+                        <th>Department Name</th><th>Description</th><th>Managers</th>
+                        <th>Status</th><th>Actions</th>
+                    </tr></thead>
+                    <tbody id="deptsBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Add Department -->
+        <div class="card">
+            <h2>Add Department</h2>
+            <div id="addDeptMsg" class="msg"></div>
+            <div class="input-group">
+                <label>Department Name</label>
+                <input type="text" id="deptName" placeholder="e.g. Engineering">
+            </div>
+            <div class="input-group">
+                <label>Description</label>
+                <input type="text" id="deptDesc" placeholder="Department description">
+            </div>
+            <button class="btn btn-dark" onclick="addDepartment()">Add Department</button>
+        </div>
+    </div>
+
+    <!-- ── ADD ADMIN TAB ── -->
+    <div class="tab-content" id="tab-addAdmin">
+        <div class="card">
+            <h2>Add New Admin</h2>
+            <div id="addAdminMsg" class="msg"></div>
+            <div class="form-grid">
+                <div class="input-group"><label>Username</label><input type="text" id="a-userName" placeholder="username"></div>
+                <div class="input-group"><label>Full Name</label><input type="text" id="a-fullName" placeholder="Full Name"></div>
+                <div class="input-group"><label>Email</label><input type="email" id="a-email" placeholder="email@example.com"></div>
+                <div class="input-group"><label>Password</label><input type="password" id="a-password" placeholder="Password"></div>
+                <div class="input-group"><label>Phone</label><input type="text" id="a-phone" placeholder="Phone Number"></div>
+                <div class="input-group"><label>Address</label><input type="text" id="a-address" placeholder="Address"></div>
+            </div>
+            <button class="btn btn-dark" onclick="addAdmin()">Add Admin</button>
+        </div>
+    </div>
+
+    <!-- ── ADD MANAGER TAB ── -->
+    <div class="tab-content" id="tab-addManager">
+        <div class="card">
+            <h2>Add New Manager</h2>
+            <div id="addManagerMsg" class="msg"></div>
+            <div class="form-grid">
+                <div class="input-group"><label>Username</label><input type="text" id="m-userName" placeholder="username"></div>
+                <div class="input-group"><label>Full Name</label><input type="text" id="m-fullName" placeholder="Full Name"></div>
+                <div class="input-group"><label>Email</label><input type="email" id="m-email" placeholder="email@example.com"></div>
+                <div class="input-group"><label>Password</label><input type="password" id="m-password" placeholder="Password"></div>
+                <div class="input-group"><label>Phone</label><input type="text" id="m-phone" placeholder="Phone Number"></div>
+                <div class="input-group"><label>Address</label><input type="text" id="m-address" placeholder="Address"></div>
+            </div>
+            <button class="btn btn-dark" onclick="addManager()">Add Manager</button>
+        </div>
+    </div>
+
+    <!-- ── AUDIT LOGS TAB ── -->
+    <div class="tab-content" id="tab-audit">
+        <div class="card">
+            <h2>Audit Logs</h2>
+            <div id="auditMsg" class="msg"></div>
+
+            <!-- filters -->
+            <div class="filter-bar">
+                <div class="input-group"><label>Start Date</label><input type="date" id="auditStart"></div>
+                <div class="input-group"><label>End Date</label><input type="date" id="auditEnd"></div>
+                <div class="input-group">
+                    <label>Sort By</label>
+                    <select id="auditSortBy">
+                        <option value="timestamp">Timestamp</option>
+                        <option value="action">Action</option>
+                        <option value="performedBy">Performed By</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Order</label>
+                    <select id="auditOrder">
+                        <option value="DESC">Newest First</option>
+                        <option value="ASC">Oldest First</option>
+                    </select>
+                </div>
+                <button class="btn btn-dark" onclick="loadAuditLogs()">Filter</button>
+            </div>
+
+            <div id="auditLoading" class="loading" style="display:none;">Loading logs...</div>
+            <div id="auditContainer">
+                <table>
+                    <thead><tr>
+                        <th>Action</th><th>Performed By</th><th>Target</th><th>Timestamp</th>
+                    </tr></thead>
+                    <tbody id="auditBody"></tbody>
+                </table>
+                <div class="pagination">
+                    <button onclick="changePage('audit', -1)">← Prev</button>
+                    <span id="auditPage">Page 1</span>
+                    <button onclick="changePage('audit', 1)">Next →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Assign Manager Modal -->
+<div id="assignModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; justify-content:center; align-items:center;">
+    <div style="background:white; border-radius:10px; padding:30px; width:400px;">
+        <h3 style="margin-bottom:20px;">Assign Manager to Department</h3>
+        <div id="assignMsg" class="msg"></div>
+        <div class="input-group">
+            <label>Department</label>
+            <input type="text" id="assign-dept" readonly style="background:#f8f9fa;">
+        </div>
+        <div class="input-group">
+            <label>Manager Username</label>
+            <input type="text" id="assign-manager" placeholder="Enter manager username">
+        </div>
+        <button class="btn btn-dark" onclick="assignManager()">Assign</button>
+        <button class="btn btn-warning" style="margin-left:10px;" onclick="closeAssignModal()">Cancel</button>
+    </div>
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>

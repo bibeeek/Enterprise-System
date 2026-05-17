@@ -6,4 +6,5 @@ public enum TaskCategory {
     FEATURE,
     ENHANCEMENT,
     MAINTENANCE,
+
 }

@@ -2,11 +2,13 @@ package com.EnterpriseSystem.demo.Services;
 
 
 import com.EnterpriseSystem.demo.Dtos.DepartmentRequestDto;
+import com.EnterpriseSystem.demo.Dtos.DepartmentResponseDto;
 import com.EnterpriseSystem.demo.Dtos.UserDto.UserResponseDto;
 import com.EnterpriseSystem.demo.Entity.AuditLogs;
 import com.EnterpriseSystem.demo.Entity.Departments;
 import com.EnterpriseSystem.demo.Entity.Tasks;
 import com.EnterpriseSystem.demo.Entity.Users;
+import com.EnterpriseSystem.demo.Exceptions.CustomExceptions.BadRequestException;
 import com.EnterpriseSystem.demo.Repository.AuditLogsRepository;
 import com.EnterpriseSystem.demo.Repository.DepartmentsRepository;
 import com.EnterpriseSystem.demo.Repository.TasksRepository;
@@ -118,21 +120,12 @@ public class ManagerServices {
 
     }
 
-
+//moved as part of the admin service
     public void enableDepartment(String departmentName){
 
         Departments existingDepartment = departmentsRepository.findDepartmentsByDepartmentNameIgnoreCase(departmentName);
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        Users manager = userRepository.findUsersByEmail(email);
 
-        if(manager.getDepartments() == null || manager.getIsActive() == false){
-            throw new RuntimeException("Manager is not assigned to any Department or is not active");
-        }
-        if (!Objects.equals(manager.getDepartments().getDepartmentId(), existingDepartment.getDepartmentId())){
-            throw new RuntimeException("Manager is not assigned to this Department");
-        }
 
         //later add logic to check if the manager is active and belongs to the department
 
@@ -142,33 +135,24 @@ public class ManagerServices {
         departmentsRepository.save(existingDepartment);
         AuditLogs logs=AuditLogs.builder().
                 action("Enabled Department")
-                        .performedBy("Manager")
+                        .performedBy("Admin")
                                 .targetEntity("Department :"+departmentName)
                                         .timestamp(LocalDateTime.now()).build();
         auditLogsRepository.save(logs);
     }
 
+    //moved as part of the admin service
     public void disableDepartment(String departmentName){
 
         Departments existingDepartment = departmentsRepository.findDepartmentsByDepartmentNameIgnoreCase(departmentName);
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        Users manager = userRepository.findUsersByEmail(email);
 
-        if(manager.getDepartments() == null || manager.getIsActive() == false){
-            throw new RuntimeException("Manager is not assigned to any Department or is not active");
-        }
-        if (!Objects.equals(manager.getDepartments().getDepartmentId(), existingDepartment.getDepartmentId())){
-            throw new RuntimeException("Manager is not assigned to this Department");
-        }
 
-        List<Users> activeUsers = userRepository.findAllByIsActiveTrue();
+        List<Users> activeUsers = userRepository.findAllByIsActiveTrueAndDepartments(existingDepartment);
         if (!activeUsers.isEmpty()) {
             throw new RuntimeException("Cannot Disable this Department as there are active Users");
         }
 
-        //later add logic to check if the manager is active and belongs to the department
 
         validations.validateDepartment(existingDepartment,"Department Does not Exists");
 
@@ -176,7 +160,7 @@ public class ManagerServices {
         departmentsRepository.save(existingDepartment);
         AuditLogs logs=AuditLogs.builder().
                 action("Disabled Department")
-                        .performedBy("Manager")
+                        .performedBy("Admin")
                                 .targetEntity("Department :"+departmentName)
                                         .timestamp(LocalDateTime.now()).build();
         auditLogsRepository.save(logs);
@@ -316,6 +300,69 @@ public class ManagerServices {
         currentTask.setAssignedTo(targetUser);
         targetUser.getTasks().add(currentTask);
         tasksRepository.save(currentTask);
+
+
+    }
+
+    //newly added methods
+    // reusable helper — gets the logged in manager
+    private Users getLoggedInManager() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        return userRepository.findUsersByEmail(email);
+    }
+
+    public DepartmentResponseDto getManagerDepartment() {
+        Users manager = getLoggedInManager();
+        if (manager.getDepartments() == null) {
+            throw new RuntimeException("You are not assigned to any department");
+        }
+        return mapper.departmentResponseDto(manager.getDepartments());
+    }
+
+    public List<UserResponseDto> listUsersInManagerDepartment() {
+        Users manager = getLoggedInManager();
+        if (manager.getDepartments() == null) {
+            throw new RuntimeException("You are not assigned to any department");
+        }
+        Departments dept = manager.getDepartments();
+        List<Users> users = userRepository.findAllByDepartmentsAndRole(dept,Roles.ROLE_USER);
+        return users.stream().map(mapper::dto).toList();
+    }
+
+    public List<UserResponseDto> listManagerInDepartment() {
+
+        Users manager = getLoggedInManager();
+        if (manager.getDepartments() == null) {
+            throw new RuntimeException("You are not assigned to any department");
+        }
+        Departments dept = manager.getDepartments();
+        List<Users> users = userRepository.findAllByDepartmentsAndRole(dept,Roles.ROLE_MANAGER);
+        return users.stream().map(mapper::dto).toList();
+
+    }
+
+    public List<UserResponseDto> listUnassignedUsers(){
+
+        List<Users> unassignedUsers = userRepository.findAllByIsActiveTrueAndRoleAndDepartmentsIsNull(Roles.ROLE_USER);
+        if (unassignedUsers.isEmpty()) {
+            throw new BadRequestException("No Users are unassigned");
+        }
+
+        return unassignedUsers.stream().map(mapper::dto).toList();
+    }
+
+    public void unassignUser(String userName){
+
+        Users foundUser = userRepository.findUsersByUserName(userName);
+        validations.validateUser(foundUser,"User Does not Exists");
+
+        if (!foundUser.getTasks().isEmpty()){
+            throw new RuntimeException("User is already assigned to a Task");
+        }
+
+        foundUser.setDepartments(null);
+        userRepository.save(foundUser);
 
 
     }

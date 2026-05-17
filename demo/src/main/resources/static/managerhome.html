@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Panel</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #f4f4f4; min-height: 100vh; }
+
+        .navbar {
+            background: #198754;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .navbar h1 { font-size: 20px; }
+        .navbar span { font-size: 14px; font-weight: bold; }
+        .navbar button {
+            background: white;
+            color: #198754;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .navbar button:hover { background: #e0e0e0; }
+
+        .tabs {
+            background: white;
+            border-bottom: 2px solid #dee2e6;
+            display: flex;
+            padding: 0 30px;
+            overflow-x: auto;
+        }
+        .tab {
+            padding: 14px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            color: #6c757d;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+        }
+        .tab.active { color: #198754; border-bottom-color: #198754; }
+        .tab:hover { color: #198754; }
+
+        .content { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.08);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            color: #333;
+        }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .input-group { margin-bottom: 14px; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px; }
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            width: 100%;
+            padding: 9px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+        }
+
+        .btn { padding: 9px 18px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .btn-green   { background: #198754; color: white; }
+        .btn-green:hover { background: #146c43; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #1e7e34; }
+        .btn-danger  { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #b02a37; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        .btn-warning:hover { background: #e0a800; }
+        .btn-info    { background: #0dcaf0; color: #212529; }
+        .btn-info:hover { background: #0aa2c0; }
+        .btn-sm { padding: 5px 11px; font-size: 12px; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { background: #f8f9fa; text-align: left; padding: 10px 12px; color: #555; font-size: 12px; text-transform: uppercase; }
+        td { padding: 11px 12px; border-bottom: 1px solid #f0f0f0; color: #333; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fafafa; }
+
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        .badge-active     { background: #d4edda; color: #155724; }
+        .badge-inactive   { background: #f8d7da; color: #721c24; }
+        .badge-inprogress { background: #cce5ff; color: #004085; }
+        .badge-done       { background: #d4edda; color: #155724; }
+        .badge-cancelled  { background: #f8d7da; color: #721c24; }
+        .badge-overdue    { background: #f8d7da; color: #721c24; }
+        .badge-open       { background: #e2e3e5; color: #383d41; }
+
+        .msg { padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 14px; display: none; }
+        .msg.show { display: block; }
+        .msg-success { background: #d4edda; color: #155724; }
+        .msg-error   { background: #f8d7da; color: #721c24; }
+
+        .loading { text-align: center; color: #888; padding: 30px; }
+        .empty   { text-align: center; color: #aaa; padding: 30px; font-size: 14px; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.open { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            width: 440px;
+            max-width: 95%;
+        }
+        .modal-box h3 { margin-bottom: 20px; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <h1>🗂 Manager Panel</h1>
+    <span id="deptLabel"></span>
+    <button onclick="logout()">Logout</button>
+</div>
+
+<div class="tabs">
+    <div class="tab active" onclick="switchTab('tasks')">Tasks</div>
+    <div class="tab" onclick="switchTab('addTask')">Add Task</div>
+    <div class="tab" onclick="switchTab('users')">Department Users</div>
+    <div class="tab" onclick="switchTab('managers')">Department Managers</div>
+    <div class="tab" onclick="switchTab('assignUser')">Assign User</div>
+</div>
+
+<div class="content">
+
+    <!-- ── TASKS TAB ── -->
+    <div class="tab-content active" id="tab-tasks">
+        <div class="card">
+            <h2>All Department Tasks</h2>
+            <div id="tasksMsg" class="msg"></div>
+            <div id="tasksLoading" class="loading">Loading tasks...</div>
+            <div id="tasksContainer" style="display:none;">
+                <table>
+                    <thead><tr>
+                        <th>Task Name</th>
+                        <th>Description</th>
+                        <th>Priority</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Assigned To</th>
+                        <th>Deadline</th>
+                        <th>Est. Hrs</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr></thead>
+                    <tbody id="tasksBody"></tbody>
+                </table>
+            </div>
+            <div id="tasksEmpty" class="empty" style="display:none;">No tasks found.</div>
+        </div>
+    </div>
+
+    <!-- ── ADD TASK TAB ── -->
+    <div class="tab-content" id="tab-addTask">
+        <div class="card">
+            <h2>Add New Task</h2>
+            <div id="addTaskMsg" class="msg"></div>
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>Task Name</label>
+                    <input type="text" id="t-name" placeholder="Task name">
+                </div>
+                <div class="input-group">
+                    <label>Estimated Hours</label>
+                    <input type="number" id="t-hours" placeholder="e.g. 4" min="1">
+                </div>
+                <div class="input-group">
+                    <label>Priority</label>
+                    <select id="t-priority">
+                        <option value="">-- Select --</option>
+                        <option value="CRITICAL">Critical</option>
+                        <option value="HIGH">High</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="LOW">Low</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Category</label>
+                    <select id="t-category">
+                        <option value="">-- Select --</option>
+                        <option value="BUGFIX">Bug Fix</option>
+                        <option value="FEATURE">Feature</option>
+                        <option value="ENHANCEMENT">Enhancement</option>
+                        <option value="MAINTENANCE">Maintenance</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Status</label>
+                    <select id="t-status">
+                        <option value="OPEN">Open</option>
+                        <option value="IN_PROGRESS">In Progress</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Deadline</label>
+                    <input type="datetime-local" id="t-deadline">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Description</label>
+                <textarea id="t-description" rows="3" placeholder="Task description"></textarea>
+            </div>
+            <button class="btn btn-green" onclick="addTask()">Add Task</button>
+        </div>
+    </div>
+
+    <!-- ── DEPARTMENT USERS TAB ── -->
+    <div class="tab-content" id="tab-users">
+        <div class="card">
+            <h2>Users in My Department</h2>
+            <div id="usersMsg" class="msg"></div>
+            <div id="usersLoading" class="loading" style="display:none;">Loading users...</div>
+            <div id="usersContainer" style="display:none;">
+                <table>
+                    <thead><tr>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Task Count</th>
+                        <th>Action</th>
+                    </tr></thead>
+                    <tbody id="usersBody"></tbody>
+                </table>
+            </div>
+            <div id="usersEmpty" class="empty" style="display:none;">No users in your department.</div>
+        </div>
+    </div>
+
+    <!-- ── DEPARTMENT MANAGERS TAB ── -->
+    <div class="tab-content" id="tab-managers">
+        <div class="card">
+            <h2>Managers in My Department</h2>
+            <div id="managersMsg" class="msg"></div>
+            <div id="managersLoading" class="loading" style="display:none;">Loading managers...</div>
+            <div id="managersContainer" style="display:none;">
+                <table>
+                    <thead><tr>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                    </tr></thead>
+                    <tbody id="managersBody"></tbody>
+                </table>
+            </div>
+            <div id="managersEmpty" class="empty" style="display:none;">No managers in your department.</div>
+        </div>
+    </div>
+
+    <!-- ── ASSIGN USER TAB ── -->
+    <div class="tab-content" id="tab-assignUser">
+        <!-- unassigned users list -->
+        <div class="card">
+            <h2>Unassigned Users</h2>
+            <p style="font-size:13px; color:#888; margin-bottom:16px;">Users with no department — click Assign to add them to your department.</p>
+            <div id="unassignedMsg" class="msg"></div>
+            <div id="unassignedLoading" class="loading">Loading unassigned users...</div>
+            <div id="unassignedContainer" style="display:none;">
+                <table>
+                    <thead><tr>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Action</th>
+                    </tr></thead>
+                    <tbody id="unassignedBody"></tbody>
+                </table>
+            </div>
+            <div id="unassignedEmpty" class="empty" style="display:none;">No unassigned users found.</div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ASSIGN TASK MODAL -->
+<div class="modal" id="assignTaskModal">
+    <div class="modal-box">
+        <h3>Assign Task to Employee</h3>
+        <div id="assignTaskMsg" class="msg"></div>
+        <div class="input-group">
+            <label>Task</label>
+            <input type="text" id="at-taskName" readonly style="background:#f8f9fa;">
+        </div>
+        <div class="input-group">
+            <label>Employee Username</label>
+            <input type="text" id="at-userName" placeholder="Enter username">
+        </div>
+        <button class="btn btn-green" onclick="assignTask()">Assign</button>
+        <button class="btn btn-warning" style="margin-left:8px;" onclick="closeModal('assignTaskModal')">Cancel</button>
+    </div>
+</div>
+
+<!-- REASSIGN TASK MODAL -->
+<div class="modal" id="reassignTaskModal">
+    <div class="modal-box">
+        <h3>Reassign Task</h3>
+        <div id="reassignTaskMsg" class="msg"></div>
+        <div class="input-group">
+            <label>Task</label>
+            <input type="text" id="rt-taskName" readonly style="background:#f8f9fa;">
+        </div>
+        <div class="input-group">
+            <label>Current Assigned User</label>
+            <input type="text" id="rt-currentUser" readonly style="background:#f8f9fa;">
+        </div>
+        <div class="input-group">
+            <label>New User</label>
+            <input type="text" id="rt-newUser" placeholder="New username">
+        </div>
+        <button class="btn btn-green" onclick="reassignTask()">Reassign</button>
+        <button class="btn btn-warning" style="margin-left:8px;" onclick="closeModal('reassignTaskModal')">Cancel</button>
+    </div>
+</div>
+
+<!-- CANCEL TASK MODAL -->
+<div class="modal" id="cancelTaskModal">
+    <div class="modal-box">
+        <h3>Cancel Task</h3>
+        <div id="cancelTaskMsg" class="msg"></div>
+        <div class="input-group">
+            <label>Task</label>
+            <input type="text" id="ct-taskName" readonly style="background:#f8f9fa;">
+        </div>
+        <div class="input-group">
+            <label>Assigned User</label>
+            <input type="text" id="ct-userName" readonly style="background:#f8f9fa;">
+        </div>
+        <button class="btn btn-danger" onclick="cancelTask()">Confirm Cancel</button>
+        <button class="btn btn-warning" style="margin-left:8px;" onclick="closeModal('cancelTaskModal')">Close</button>
+    </div>
+</div>
+
+<script src="manager.js"></script>
+</body>
+</html>

@@ -61,6 +61,20 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(req-> req.
                          requestMatchers(("/auth/**")).permitAll()
+                        .requestMatchers(
+                                "/register.html",
+                                "/login.html",
+                                "/home.html",
+                                "/",
+                                "/adminhome.html",
+                                "/admin.js",
+                                "/managerhome.html",
+                                "/manager.js",
+                                "/css/**",
+                                "/auth.js",
+                                "/home.js",
+                                "/images/**"
+                        ).permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger-ui/index.html", "/webjars/**").permitAll()
                         .requestMatchers(("/admin/**")).hasRole("ADMIN")
                         .requestMatchers(("/manager/**")).hasAnyRole("MANAGER","ADMIN")
